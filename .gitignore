@@ -1,0 +1,24 @@
+# Environments
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Large / generated artifacts (kept in Drive / HF Hub, not git)
+checkpoints/*
+!checkpoints/.gitkeep
+data/synthetic/*
+!data/synthetic/.gitkeep
+data/probing/*
+!data/probing/.gitkeep
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+*.token

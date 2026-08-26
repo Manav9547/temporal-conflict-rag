@@ -73,6 +73,22 @@ spare.
 **Decision:** run the generator in fp16 throughout. Fall back to 4-bit only if
 VRAM pressure is empirically observed (not expected at this model scale).
 
+## 5. Bi-encoder uses one shared-weight tower, not separate E_Q / E_D
+
+The proposal's Stage 1 notation writes separate encoders `E_Q` and `E_D` for
+queries and documents. In practice, the dominant approach for sentence-level
+bi-encoders at this model scale — and the one `sentence-transformers/
+all-MiniLM-L6-v2` itself was trained with — is a single shared-weight
+("Siamese") tower used for both sides. Maintaining two independently
+parameterized encoders would roughly double the parameters to fine-tune with
+no more than ~1000 synthetic triples, meaningfully raising overfitting risk
+for no expected benefit at this scale.
+
+**Decision:** `src/retriever/model.py`'s `BiEncoder` uses one shared encoder
+for both queries and documents. If the query/document asymmetry turns out to
+matter empirically (checked via the Day 4 eval), splitting into two towers is
+a straightforward follow-up.
+
 ---
 
-*Last updated: Day 1 (2026-08-24).*
+*Last updated: Day 3 (2026-08-26).*

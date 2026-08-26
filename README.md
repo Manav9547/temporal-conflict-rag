@@ -26,7 +26,7 @@ Day-by-day build log follows the plan in
 
 - [x] Day 1 — repo scaffold, environment setup, design decisions
 - [x] Day 2 — synthetic fact-mutation data generation
-- [ ] Day 3 — retriever model + loss implementation
+- [x] Day 3 — retriever model + loss implementation
 - [ ] Day 4 — retriever training + evaluation
 - [ ] Day 5 — generator prompt construction + activation extraction
 - [ ] Day 6 — conflict-probe dataset generation
@@ -68,6 +68,13 @@ python -m src.data_gen.generate_retrieval_triples
 
 Current dataset: 980 records (641 train / 59 in-domain val / 120 ood val /
 160 ood test), mean lexical (Jaccard) overlap between fresh/stale docs: 0.78.
+
+**Untrained MiniLM baseline** (sanity check the hard negatives are genuinely
+hard): given a query and its own fresh vs. stale doc, untrained MiniLM
+prefers the fresh doc only 60% of the time (mean cosine sim 0.854 vs. 0.853
+— nearly indistinguishable). This is the gap Stage 1 training (Day 4) should
+close. Run `python -m pytest tests/` to verify the loss implementation
+against a hand-computed example first.
 
 ## Models
 

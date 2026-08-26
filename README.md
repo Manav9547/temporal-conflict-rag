@@ -25,7 +25,7 @@ Day-by-day build log follows the plan in
 `C:\Users\jinda\.claude\plans\read-the-proposal-pdf-and-memoized-hollerith.md`.
 
 - [x] Day 1 — repo scaffold, environment setup, design decisions
-- [ ] Day 2 — synthetic fact-mutation data generation
+- [x] Day 2 — synthetic fact-mutation data generation
 - [ ] Day 3 — retriever model + loss implementation
 - [ ] Day 4 — retriever training + evaluation
 - [ ] Day 5 — generator prompt construction + activation extraction
@@ -47,6 +47,27 @@ pip install -r requirements.txt
 
 Run [`notebooks/00_setup_and_env_check.ipynb`](notebooks/00_setup_and_env_check.ipynb)
 on a Colab or Kaggle T4 GPU runtime to verify the environment before proceeding.
+
+## Data
+
+Synthetic retrieval triples are generated (not stored raw in git — regenerate
+with the command below) from parameterized templates across 5 domains:
+corporate policy, software versions, regulatory guidelines, pricing tiers,
+and product specs. Each triple pairs a query with a temporally *fresh*
+document and a lexically near-identical *stale* document that differs only
+in the fact value and date — this is what forces the retriever to learn
+temporal signal rather than keyword overlap.
+
+Splits are assigned by **domain**, not per-triple, to test generalization:
+`train`/`in_domain_val` (3 domains), `ood_val` (pricing_tier, unseen during
+training), `ood_test` (product_spec, held out until final evaluation).
+
+```bash
+python -m src.data_gen.generate_retrieval_triples
+```
+
+Current dataset: 980 records (641 train / 59 in-domain val / 120 ood val /
+160 ood test), mean lexical (Jaccard) overlap between fresh/stale docs: 0.78.
 
 ## Models
 

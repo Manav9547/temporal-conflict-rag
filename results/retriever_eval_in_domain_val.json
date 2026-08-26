@@ -1,0 +1,15 @@
+{
+  "split": "in_domain_val",
+  "baseline": {
+    "n": 59,
+    "mrr_at_1": 0.6271186470985413,
+    "alignment": 0.2876088321208954,
+    "uniformity_of_docs": -2.365330696105957
+  },
+  "trained": {
+    "n": 59,
+    "mrr_at_1": 1.0,
+    "alignment": 0.8343285322189331,
+    "uniformity_of_docs": -2.287170886993408
+  }
+}

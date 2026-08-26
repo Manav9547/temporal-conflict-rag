@@ -1,0 +1,19 @@
+model_name: sentence-transformers/all-MiniLM-L6-v2
+tau: 0.05
+gamma: 0.2
+
+batch_size: 32
+accum_steps: 1        # proposal's hardware spec assumes accum_steps=4 for a
+                       # much larger corpus; with ~600 train triples a plain
+                       # batch of 32 already gives ~20 optimizer steps/epoch
+learning_rate: 2.0e-5
+weight_decay: 0.01
+max_epochs: 30
+patience: 6            # early stop if ood_val accuracy doesn't improve for N epochs
+eval_every: 1
+max_seq_length: 64
+seed: 42
+
+data_dir: data/synthetic
+checkpoint_dir: checkpoints/retriever
+results_dir: results

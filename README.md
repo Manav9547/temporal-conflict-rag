@@ -27,7 +27,7 @@ Day-by-day build log follows the plan in
 - [x] Day 1 — repo scaffold, environment setup, design decisions
 - [x] Day 2 — synthetic fact-mutation data generation
 - [x] Day 3 — retriever model + loss implementation
-- [ ] Day 4 — retriever training + evaluation
+- [x] Day 4 — retriever training + evaluation
 - [ ] Day 5 — generator prompt construction + activation extraction
 - [ ] Day 6 — conflict-probe dataset generation
 - [ ] Day 7 — probe training (midpoint milestone)
@@ -75,6 +75,38 @@ prefers the fresh doc only 60% of the time (mean cosine sim 0.854 vs. 0.853
 — nearly indistinguishable). This is the gap Stage 1 training (Day 4) should
 close. Run `python -m pytest tests/` to verify the loss implementation
 against a hand-computed example first.
+
+## Stage 1 results (Day 4)
+
+Trained locally on CPU (~3 min, 7 epochs, early-stopped) -- MiniLM at this
+data scale doesn't need a GPU. MRR@1 (== Hit@1 at k=1) baseline vs. trained,
+against the proposal's targets:
+
+| split          | domain          | MRR@1 baseline | MRR@1 trained | target | uniformity trained | target |
+|----------------|------------------|:--:|:--:|:--:|:--:|:--:|
+| in_domain_val  | train domains    | 0.63 | **1.00** | >0.85 | -2.29 | <-2.20 (missed) |
+| ood_val        | pricing_tier     | 0.55 | **0.81** | >0.85 (missed) | -1.86 | <-2.20 (missed) |
+| ood_test       | product_spec     | 0.64 | **0.91** | >0.85 | -2.34 | <-2.20 (met) |
+
+Run: `python -m src.retriever.train_retriever` then
+`python -m src.retriever.eval_retriever --split <name>`.
+
+**Honest read of these numbers:** MRR@1 improves substantially everywhere,
+but training loss collapses to near-zero after epoch 1 -- almost certainly
+because every domain's fresh/stale split maps onto the same two year pools
+(`FRESH_YEARS=[2025,2026]` vs `STALE_YEARS=[2018-2022]`, see
+`fact_mutation_templates.py`), so the model likely learns a shallow "does
+this doc contain a recent-looking year token" shortcut rather than deep
+per-domain temporal reasoning. That shortcut is domain-invariant, which is
+exactly why it transfers to held-out domains at all -- but it also means the
+ood_val/ood_test split doesn't cleanly separate "learned temporal semantics"
+from "learned to detect one specific token pattern." Uniformity getting
+*worse* on two splits after training is consistent with this: the model is
+optimizing for a fairly narrow discriminative signal, not genuinely spreading
+representations across the embedding space. A stronger generalization test
+(e.g. holding out specific year values from training, not just domains)
+is a reasonable Day-13 stretch item if time allows -- documented here rather
+than silently treated as solved.
 
 ## Models
 

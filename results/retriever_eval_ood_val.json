@@ -1,0 +1,15 @@
+{
+  "split": "ood_val",
+  "baseline": {
+    "n": 120,
+    "mrr_at_1": 0.550000011920929,
+    "alignment": 0.20021668076515198,
+    "uniformity_of_docs": -1.814168930053711
+  },
+  "trained": {
+    "n": 120,
+    "mrr_at_1": 0.8083333373069763,
+    "alignment": 0.5455342531204224,
+    "uniformity_of_docs": -1.8603781461715698
+  }
+}

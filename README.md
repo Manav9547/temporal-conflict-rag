@@ -28,7 +28,7 @@ Day-by-day build log follows the plan in
 - [x] Day 2 — synthetic fact-mutation data generation
 - [x] Day 3 — retriever model + loss implementation
 - [x] Day 4 — retriever training + evaluation
-- [ ] Day 5 — generator prompt construction + activation extraction
+- [x] Day 5 — generator prompt construction + activation extraction
 - [ ] Day 6 — conflict-probe dataset generation
 - [ ] Day 7 — probe training (midpoint milestone)
 - [ ] Day 8 — thin end-to-end pipeline wiring
@@ -107,6 +107,24 @@ representations across the embedding space. A stronger generalization test
 (e.g. holding out specific year values from training, not just domains)
 is a reasonable Day-13 stretch item if time allows -- documented here rather
 than silently treated as solved.
+
+## Stage 2 notes (Day 5)
+
+`python -m src.generator.extract_activations` runs the Stage 1 -> Stage 2
+smoke test: retrieves top-1 with the trained retriever, builds the
+`Context/Query/Answer` prompt, and extracts the residual-stream state at
+every layer for the final prompt token (shape `[29, 1536]` for
+Qwen2.5-1.5B: 28 layers + the embedding layer). Ran on 5 real held-out
+queries -- retriever picked the fresh document in all 5.
+
+`python -m src.generator.hooks` cross-checks that against manual
+`register_forward_hook` capture, and surfaces a real subtlety worth knowing
+before Stage 3: `hidden_states[-1]` (the last entry) is **not** the raw
+residual stream -- HF applies the model's final RMSNorm to the last layer's
+output before storing it there, so it doesn't match a raw hook capture at
+that index (diff ~244), while every other layer matches exactly (diff 0.0).
+Irrelevant to our probe range (layers 18-24) but would be a silent bug for
+any sweep that assumed every `hidden_states` index means the same thing.
 
 ## Models
 
